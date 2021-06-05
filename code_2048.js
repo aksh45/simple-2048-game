@@ -1,13 +1,18 @@
+// module for input output
 const prompt = require('prompt-sync')();
 
+// size of grid
 const n = 4;
+// target value
 const target = 2048;
 
 var grid = [];
-var used_elems = [];
+// random numbers 
 var allowed_nums = [2,4];
 var result;
 var change;
+
+//snippet for empty grid
 for(var row=0; row<n; row++){
     var tmp = [];
     for(var coloumn = 0; coloumn <n ; coloumn++){
@@ -16,10 +21,13 @@ for(var row=0; row<n; row++){
     }
     grid.push(tmp);
 }
+
+// function to get random integer between min and max 
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min) ) + min;
 }
 
+// add random allowed number to grid
 function add_random_number(){
     var r = getRndInteger(0,4);
     var c = getRndInteger(0,4);
@@ -30,6 +38,11 @@ function add_random_number(){
     }
     grid[r][c] = allowed_nums[getRndInteger(0,2)];
 }
+
+// compress the grid on move, i.e move the elements to left
+// the compress and merge function are based on left move because we will convert 
+// all moves to left
+// use the compress before merge and after merge
 function compress(grid){
     var changed = false;
     var tmp_grid = [];
@@ -57,7 +70,7 @@ function compress(grid){
     return  [tmp_grid, changed];
 
 }
-
+// merge two numbers if possible
 function merge(grid){
     var changed = false;
     for(var row = 0; row<n; row++){
@@ -72,6 +85,7 @@ function merge(grid){
     return [grid,changed];
 }
 
+// reverse the grid
 function reverse(grid){
     var new_grid =[];
     for(var row = 0; row<n; row++){
@@ -82,6 +96,8 @@ function reverse(grid){
     }
     return new_grid;
 }
+
+// take the transpose , i.e interchange rows and coloumns
 function transpose(grid){
     var new_grid = [];
     for(var row = 0; row<n; row++){
@@ -92,6 +108,8 @@ function transpose(grid){
     }
     return new_grid;
 }
+
+// base move
 function move_left(grid){
     var res = compress(grid);
     var new_grid = res[0];
@@ -104,7 +122,7 @@ function move_left(grid){
     return [new_grid[0],change];
 
 }
-
+// reverse the grid and then apply left move and then undo the reverse
 function move_right(grid){
     var new_grid = reverse(grid);
     var res = move_left(new_grid);
@@ -112,18 +130,24 @@ function move_right(grid){
 
 
 }
+
+// take the transpose and then apply left move and then undo the transpose
 function move_up(grid){
     var  new_grid = transpose(grid);
     var res = move_left(new_grid);
     return [transpose(res[0]),res[1]];
 }
 
+// take the transpose and then apply right move and then undo the transpose
 function move_down(grid){
     var new_grid = transpose(grid);
     var res = move_right(new_grid);
     return [transpose(res[0]),res[1]];
 }
-
+// if we reached the target game is over 
+// if we are left with 1 empty cell then game is not over
+// if the grid is filled but still if on any move left,right,up,down then also
+// game is not over
 function get_current_state(grid){
     for(var row = 0; row < n; row++){
         for(var coloumn = 0; coloumn <n; coloumn++){
@@ -152,18 +176,21 @@ function get_current_state(grid){
             return 0;
     }
     for(var row = 0; row < n-1; row++){
-        if(grid[row][n-1]== mat[row + 1][n-1])
+        if(grid[row][n-1]== grid[row + 1][n-1])
             return 0;
         
     }
     return -1;
 }
+// move validator
 function move_validator(move){
     if (move == 1 || move == 2 || move == 3 || move == 4){
         return 1;
     }
     return 0
 }
+
+// print grid
 function grid_print(grid){
     var res = '';
     for(var row = 0;row<n;row++){
@@ -173,11 +200,12 @@ function grid_print(grid){
 add_random_number();
 add_random_number();
 grid_print(grid);
+console.log('Enter 1, 2, 3, 4 to indicate left, right, up, down and -1 to quit');
 while(1){
     var move = prompt('Enter Your move');
     var counter = 0;
     while (!(move_validator(move))){
-        if (move == 0){
+        if (move == -1){
             counter = 1; 
             break;
         }
